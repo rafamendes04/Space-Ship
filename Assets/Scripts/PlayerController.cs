@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 /// <summary>
 /// Controls the player ship movement, shooting, and slow-motion activation.
@@ -55,8 +56,17 @@ public class PlayerController : MonoBehaviour
 
     void HandleMovement()
     {
-        float h = Input.GetAxisRaw("Horizontal");
-        float v = Input.GetAxisRaw("Vertical");
+        float h = 0f;
+        float v = 0f;
+
+        if (Keyboard.current != null)
+        {
+            if (Keyboard.current.dKey.isPressed || Keyboard.current.rightArrowKey.isPressed) h = 1f;
+            else if (Keyboard.current.aKey.isPressed || Keyboard.current.leftArrowKey.isPressed) h = -1f;
+
+            if (Keyboard.current.wKey.isPressed || Keyboard.current.upArrowKey.isPressed) v = 1f;
+            else if (Keyboard.current.sKey.isPressed || Keyboard.current.downArrowKey.isPressed) v = -1f;
+        }
 
         Vector3 pos = transform.position;
         pos.x += h * moveSpeed * Time.unscaledDeltaTime;
@@ -70,7 +80,7 @@ public class PlayerController : MonoBehaviour
 
     void HandleShooting()
     {
-        if (Input.GetKey(KeyCode.Space) && Time.unscaledTime >= _nextFireTime)
+        if (Keyboard.current != null && Keyboard.current.spaceKey.isPressed && Time.unscaledTime >= _nextFireTime)
         {
             _nextFireTime = Time.unscaledTime + fireRate;
             Vector3 spawnPos = firePoint != null ? firePoint.position : transform.position;
@@ -81,7 +91,7 @@ public class PlayerController : MonoBehaviour
     void HandleSlowMotion()
     {
         // Manual trigger via Left Shift (when slow-mo is unlocked by GameManager)
-        if (Input.GetKeyDown(KeyCode.LeftShift) && GameManager.Instance.IsSlowMotionUnlocked && !_slowActive)
+        if (Keyboard.current != null && Keyboard.current.leftShiftKey.wasPressedThisFrame && GameManager.Instance.IsSlowMotionUnlocked && !_slowActive)
         {
             ActivateSlowMotion();
         }
